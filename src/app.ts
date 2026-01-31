@@ -5,6 +5,7 @@ import { menuItemsRouter } from "./modules/menuItem/menuItem.router";
 import { auth } from "./lib/auth";
 import { restaurantRouter } from "./modules/restaurant/restaurant.router";
 import errorHandler from "./middlewares/globalErrorEandler";
+import { cartRouter } from "./modules/cart/cart.router";
 
 const app: Application = express();
 
@@ -23,6 +24,8 @@ app.use("/menu-items", menuItemsRouter)
 // retaurants
 app.use("/restaurants", restaurantRouter)
 
+// cart
+app.use("/cart", cartRouter);
 
 app.use(errorHandler)
 

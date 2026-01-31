@@ -18,6 +18,8 @@ model User {
 
     addresses Json?
 
+    cart Cart?
+
     orders      Order[]      @relation("CustomerOrders")
     reviews     Review[]
     restaurants Restaurant[]
