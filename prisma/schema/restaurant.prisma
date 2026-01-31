@@ -1,0 +1,20 @@
+model Restaurant {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  phone       String?
+  addressLine String
+  city        String
+  isActive    Boolean  @default(true)
+
+  menuItems   MenuItem[]
+  orders      Order[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([providerId])
+}

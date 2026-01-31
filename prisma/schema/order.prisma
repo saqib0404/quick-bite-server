@@ -1,0 +1,32 @@
+model Order {
+    id         String @id @default(cuid())
+    customerId String
+    customer   User   @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Restrict)
+
+    menuItemId String
+    menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+
+    restaurantId String
+    restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Restrict)
+
+    status                  OrderStatus @default(PENDING)
+    totalCents              Int
+    notes                   String?
+    deliveryAddressSnapshot Json? // store address snapshot at time of order
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([customerId])
+    @@index([restaurantId])
+    @@index([menuItemId])
+}
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    PREPARING
+    OUT_FOR_DELIVERY
+    DELIVERED
+    CANCELLED
+}
