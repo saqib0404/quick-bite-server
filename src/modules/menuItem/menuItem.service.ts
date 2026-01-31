@@ -11,6 +11,11 @@ type CreateMenuItemInput = {
     cuisine: CuisineType,
 };
 
+type GetMenuItemsOptions = {
+    cuisine?: "MEAT" | "FISH" | "VEG" | "VEGAN" | undefined;
+    minPrice?: number | undefined;
+};
+
 const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
 
     const user = await prisma.user.findUnique({
@@ -46,7 +51,7 @@ const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
         const err: any = new Error("Restaurant not found or you don't own it.");
         err.statusCode = 404;
         throw err;
-    }    
+    }
 
     const result = await prisma.menuItem.create({
         data: {
@@ -63,14 +68,22 @@ const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
     return result;
 };
 
-const getAllMenuItems = async () => {
+const getAllMenuItems = async ({ cuisine, minPrice }: GetMenuItemsOptions = {}) => {
+    const where: any = {
+        isAvailable: true,
+    };
+
+    if (cuisine) {
+        where.cuisine = cuisine;
+    }
+
+    if (typeof minPrice === "number") {
+        where.priceCents = { gte: minPrice };
+    }
+
     return prisma.menuItem.findMany({
-        where: {
-            isAvailable: true,
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
+        where,
+        orderBy: { createdAt: "desc" },
     });
 };
 

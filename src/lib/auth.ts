@@ -30,7 +30,7 @@ export const auth = betterAuth({
             },
             isApproved: {
                 type: "boolean",
-                defaultValue: false,
+                defaultValue: true,
                 required: false,
             },
             addresses: {

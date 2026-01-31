@@ -14,7 +14,7 @@ model User {
     status String? @default("ACTIVE")
 
     businessName String?
-    isApproved   Boolean @default(false)
+    isApproved   Boolean @default(true)
 
     addresses Json?
 

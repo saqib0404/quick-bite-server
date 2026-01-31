@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express"
 import { menuItemService } from "./menuItem.service"
 
+const CUISINES = ["MEAT", "FISH", "VEG", "VEGAN"] as const;
+type Cuisine = (typeof CUISINES)[number];
+
 const createMenuItem = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.user?.id) {
@@ -21,8 +24,23 @@ const createMenuItem = async (req: Request, res: Response, next: NextFunction) =
 
 const getAllMenuItems = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await menuItemService.getAllMenuItems();
+        const cuisineRaw = req.query.cuisine;
+        const minPriceRaw = req.query.minPrice;
 
+        const cuisine =
+            typeof cuisineRaw === "string" && (CUISINES as readonly string[]).includes(cuisineRaw)
+                ? (cuisineRaw as Cuisine)
+                : undefined;
+
+        const minPrice =
+            typeof minPriceRaw === "string" && !Number.isNaN(Number(minPriceRaw))
+                ? Number(minPriceRaw)
+                : undefined;
+
+        const result = await menuItemService.getAllMenuItems({
+            cuisine,
+            minPrice,
+        });
         res.status(200).json(result)
     } catch (err) {
         next(err);
