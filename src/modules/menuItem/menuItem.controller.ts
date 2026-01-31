@@ -71,10 +71,45 @@ const getMenuItemByRestaurantId = async (req: Request, res: Response, next: Next
     }
 };
 
+const updateMenuItem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const providerId = req.user!.id;
+        const { menuItemId } = req.params;
+
+        const result = await menuItemService.updateMenuItem(providerId, menuItemId as string, req.body);
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const deleteMenuItem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const providerId = req.user!.id;
+        const { menuItemId } = req.params;
+
+        const result = await menuItemService.deleteMenuItem(providerId, menuItemId as string);
+
+        res.status(200).json({
+            success: true,
+            message: "Menu item deleted.",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 
 export const MenuItemController = {
     createMenuItem,
     getAllMenuItems,
     getMenuItemById,
-    getMenuItemByRestaurantId
+    getMenuItemByRestaurantId,
+    updateMenuItem,
+    deleteMenuItem
 }

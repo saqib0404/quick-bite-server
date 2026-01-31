@@ -11,4 +11,9 @@ router.get("/:menuItemId", MenuItemController.getMenuItemById)
 
 router.post("/", auth(UserRole.PROVIDER), MenuItemController.createMenuItem)
 
+router.patch("/:menuItemId", auth(UserRole.PROVIDER), MenuItemController.updateMenuItem);
+
+router.delete("/:menuItemId", auth(UserRole.PROVIDER), MenuItemController.deleteMenuItem);
+
+
 export const menuItemsRouter = router

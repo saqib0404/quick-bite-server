@@ -4,6 +4,10 @@ import { OrderController } from "./order.controller";
 
 const router = Router();
 
+
+//  For Admin
+router.get("/", auth(UserRole.ADMIN), OrderController.getallOrders)
+
 router.post("/checkout", auth(UserRole.CUSTOMER), OrderController.checkoutFromCart);
 
 // Customer: view own orders

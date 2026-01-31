@@ -2,6 +2,16 @@ import { Request, Response, NextFunction } from "express";
 import { OrderStatus } from "../../../generated/prisma/client";
 import { orderService } from "./order.service";
 
+const getallOrders = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await orderService.getallOrders();
+
+        res.status(200).json(result)
+    } catch (err) {
+        next(err);
+    }
+};
+
 const checkoutFromCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const customerId = req.user!.id;
@@ -60,6 +70,7 @@ const updateOrderStatusByProvider = async (req: Request, res: Response, next: Ne
 };
 
 export const OrderController = {
+    getallOrders,
     checkoutFromCart,
     getMyOrders,
     getProviderOrders,

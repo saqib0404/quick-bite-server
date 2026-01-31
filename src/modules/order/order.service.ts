@@ -6,6 +6,14 @@ type CheckoutInput = {
     notes?: string;
 };
 
+const getallOrders = async () => {
+    return prisma.order.findMany({
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};
+
 const checkoutFromCart = async (customerId: string, input: CheckoutInput) => {
     if (!input?.deliveryAddressSnapshot) {
         const err: any = new Error("deliveryAddressSnapshot is required for delivery (Cash on Delivery).");
@@ -184,6 +192,7 @@ const updateOrderStatusByProvider = async (providerId: string, orderId: string, 
 };
 
 export const orderService = {
+    getallOrders,
     checkoutFromCart,
     getMyOrders,
     getProviderOrders,

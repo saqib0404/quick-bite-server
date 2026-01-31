@@ -16,6 +16,15 @@ type GetMenuItemsOptions = {
     minPrice?: number | undefined;
 };
 
+type UpdateMenuItemInput = {
+    name?: string;
+    description?: string | null;
+    priceCents?: number;
+    imageUrl?: string | null;
+    isAvailable?: boolean;
+    cuisine?: CuisineType;
+};
+
 const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
 
     const user = await prisma.user.findUnique({
@@ -105,9 +114,68 @@ const getMenuItemByRestaurantId = async (id: string) => {
     return result
 }
 
+const updateMenuItem = async (providerId: string, menuItemId: string, data: UpdateMenuItemInput) => {
+    // 1) confirm menu item exists and belongs to provider
+    const existing = await prisma.menuItem.findFirst({
+        where: {
+            id: menuItemId,
+            restaurant: {
+                providerId,
+            },
+        },
+        select: { id: true },
+    });
+
+    if (!existing) {
+        const err: any = new Error("Menu item not found or you don't have access.");
+        err.statusCode = 404;
+        throw err;
+    }
+
+
+    if (data.priceCents !== undefined) {
+        if (!Number.isInteger(data.priceCents) || data.priceCents <= 0) {
+            const err: any = new Error("priceCents must be a positive integer.");
+            err.statusCode = 400;
+            throw err;
+        }
+    }
+
+
+    return prisma.menuItem.update({
+        where: { id: menuItemId },
+        data: {
+            ...(data.name !== undefined ? { name: data.name } : {}),
+            ...(data.description !== undefined ? { description: data.description } : {}),
+            ...(data.priceCents !== undefined ? { priceCents: data.priceCents } : {}),
+            ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl } : {}),
+            ...(data.isAvailable !== undefined ? { isAvailable: data.isAvailable } : {}),
+            ...(data.cuisine !== undefined ? { cuisine: data.cuisine } : {}),
+        },
+    });
+};
+
+const deleteMenuItem = async (providerId: string, menuItemId: string) => {
+    const existing = await prisma.menuItem.findFirst({
+        where: { id: menuItemId, restaurant: { providerId } },
+        select: { id: true },
+    });
+
+    if (!existing) {
+        const err: any = new Error("Menu item not found or you don't have access.");
+        err.statusCode = 404;
+        throw err;
+    }
+
+    return prisma.menuItem.delete({ where: { id: menuItemId } });
+};
+
+
 export const menuItemService = {
     createMenuItem,
     getAllMenuItems,
     getMenuItemById,
-    getMenuItemByRestaurantId
+    getMenuItemByRestaurantId,
+    updateMenuItem,
+    deleteMenuItem
 }
