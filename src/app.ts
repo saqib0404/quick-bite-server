@@ -1,6 +1,8 @@
 import express, { Application } from "express"
 import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
+import { menuItemsRouter } from "./modules/menuItem/menuItem.router";
+import { auth } from "./lib/auth";
 
 const app: Application = express();
 
@@ -11,6 +13,10 @@ app.use(cors({
 }))
 
 
+app.all('/api/auth/{*any}', toNodeHandler(auth));
+
+// Posts
+app.use("/menu-items", menuItemsRouter)
 
 
 
