@@ -16,7 +16,31 @@ const createRestaurant = async (req: Request, res: Response, next: NextFunction)
     }
 }
 
+const getRestaurants = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await restaurantService.getAllRestaurants();
+
+        res.status(200).json(result)
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getRestaurantById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const { restaurantId } = req.params
+        const result = await restaurantService.getRestaurantById(restaurantId as string);
+
+        res.status(200).json(result)
+    } catch (err) {
+        next(err);
+    }
+};
+
 
 export const RestaurantController = {
-    createRestaurant
+    createRestaurant,
+    getRestaurants,
+    getRestaurantById
 }

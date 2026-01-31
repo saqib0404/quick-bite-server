@@ -20,8 +20,29 @@ const createRestaurant = async (data: Omit<Restaurant, 'id' | 'createdAt' | 'upd
     return result
 }
 
+const getAllRestaurants = async () => {
+    return prisma.restaurant.findMany({
+        where: {
+            isActive: true,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};
+
+const getRestaurantById = async (id: string) => {
+    const result = await prisma.restaurant.findUnique({
+        where: {
+            id
+        }
+    })
+    return result
+}
 
 
 export const restaurantService = {
     createRestaurant,
+    getAllRestaurants,
+    getRestaurantById
 }

@@ -19,7 +19,44 @@ const createMenuItem = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
+const getAllMenuItems = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await menuItemService.getAllMenuItems();
+
+        res.status(200).json(result)
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getMenuItemById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const { menuItemId } = req.params
+        const result = await menuItemService.getMenuItemById(menuItemId as string);
+
+        res.status(200).json(result)
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getMenuItemByRestaurantId = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const { restaurantId } = req.params
+        const result = await menuItemService.getMenuItemByRestaurantId(restaurantId as string);
+
+        res.status(200).json(result)
+    } catch (err) {
+        next(err);
+    }
+};
+
 
 export const MenuItemController = {
-    createMenuItem
+    createMenuItem,
+    getAllMenuItems,
+    getMenuItemById,
+    getMenuItemByRestaurantId
 }

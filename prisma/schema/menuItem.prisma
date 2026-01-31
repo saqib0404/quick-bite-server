@@ -9,6 +9,8 @@ model MenuItem {
     imageUrl    String?
     isAvailable Boolean @default(true)
 
+    cuisine CuisineType
+
     orders  Order[]
     reviews Review[]
 
@@ -16,4 +18,11 @@ model MenuItem {
     updatedAt DateTime @updatedAt
 
     @@index([restaurantId])
+}
+
+enum CuisineType {
+    MEAT
+    FISH
+    VEG
+    VEGAN
 }

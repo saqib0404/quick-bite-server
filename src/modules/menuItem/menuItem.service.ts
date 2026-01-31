@@ -1,4 +1,4 @@
-import { MenuItem } from "../../../generated/prisma/client"
+import { CuisineType, MenuItem } from "../../../generated/prisma/client"
 import { prisma } from "../../lib/prisma"
 
 type CreateMenuItemInput = {
@@ -8,6 +8,7 @@ type CreateMenuItemInput = {
     priceCents: number;
     imageUrl?: string;
     isAvailable?: boolean;
+    cuisine: CuisineType,
 };
 
 const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
@@ -45,7 +46,7 @@ const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
         const err: any = new Error("Restaurant not found or you don't own it.");
         err.statusCode = 404;
         throw err;
-    }
+    }    
 
     const result = await prisma.menuItem.create({
         data: {
@@ -55,14 +56,45 @@ const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
             priceCents: data.priceCents,
             imageUrl: data.imageUrl ?? null,
             isAvailable: data.isAvailable ?? true,
+            cuisine: data.cuisine
         },
     });
 
     return result;
 };
 
+const getAllMenuItems = async () => {
+    return prisma.menuItem.findMany({
+        where: {
+            isAvailable: true,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};
 
+const getMenuItemById = async (id: string) => {
+    const result = await prisma.menuItem.findUnique({
+        where: {
+            id
+        }
+    })
+    return result
+}
+
+const getMenuItemByRestaurantId = async (id: string) => {
+    const result = await prisma.menuItem.findMany({
+        where: {
+            restaurantId: id
+        }
+    })
+    return result
+}
 
 export const menuItemService = {
     createMenuItem,
+    getAllMenuItems,
+    getMenuItemById,
+    getMenuItemByRestaurantId
 }
