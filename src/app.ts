@@ -7,6 +7,7 @@ import { restaurantRouter } from "./modules/restaurant/restaurant.router";
 import errorHandler from "./middlewares/globalErrorEandler";
 import { cartRouter } from "./modules/cart/cart.router";
 import { orderRouter } from "./modules/order/order.router";
+import { reviewRouter } from "./modules/review/review.router";
 
 const app: Application = express();
 
@@ -30,6 +31,10 @@ app.use("/cart", cartRouter);
 
 // order
 app.use("/orders", orderRouter);
+
+// review
+app.use("/reviews", reviewRouter);
+
 
 app.use(errorHandler)
 
