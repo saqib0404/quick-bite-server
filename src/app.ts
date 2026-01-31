@@ -4,6 +4,7 @@ import cors from "cors";
 import { menuItemsRouter } from "./modules/menuItem/menuItem.router";
 import { auth } from "./lib/auth";
 import { restaurantRouter } from "./modules/restaurant/restaurant.router";
+import errorHandler from "./middlewares/globalErrorEandler";
 
 const app: Application = express();
 
@@ -23,6 +24,6 @@ app.use("/menu-items", menuItemsRouter)
 app.use("/restaurants", restaurantRouter)
 
 
-
+app.use(errorHandler)
 
 export { app }

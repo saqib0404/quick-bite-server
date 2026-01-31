@@ -13,11 +13,14 @@ model User {
     phone  String?
     status String? @default("ACTIVE")
 
-    orders          Order[]   @relation("CustomerOrders")
-    reviews         Review[]
-    addresses       Address[]
-    providerProfile Provider?
-    customerProfile Customer?
+    businessName String?
+    isApproved   Boolean @default(false)
+
+    addresses Json?
+
+    orders      Order[]      @relation("CustomerOrders")
+    reviews     Review[]
+    restaurants Restaurant[]
 
     @@unique([email])
     @@map("user")
@@ -69,46 +72,6 @@ model Verification {
 
     @@index([identifier])
     @@map("verification")
-}
-
-model Address {
-    id     String @id @default(cuid())
-    userId String
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    label    String? // e.g. "Home"
-    line1    String
-    line2    String?
-    city     String
-    postcode String?
-    notes    String?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([userId])
-}
-
-model Provider {
-    id     String @id @default(cuid())
-    userId String @unique
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    businessName String
-    isApproved   Boolean @default(false)
-
-    restaurants Restaurant[]
-    createdAt   DateTime     @default(now())
-    updatedAt   DateTime     @updatedAt
-}
-
-model Customer {
-    id     String @id @default(cuid())
-    userId String @unique
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
 }
 
 enum Role {

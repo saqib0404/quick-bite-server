@@ -23,6 +23,19 @@ export const auth = betterAuth({
                 type: "string",
                 defaultValue: "ACTIVE",
                 required: false
+            },
+            businessName: {
+                type: "string",
+                required: false,
+            },
+            isApproved: {
+                type: "boolean",
+                defaultValue: false,
+                required: false,
+            },
+            addresses: {
+                type: "json",
+                required: false,
             }
         }
     },
