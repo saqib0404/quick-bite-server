@@ -31,6 +31,36 @@ const updateUserStatus = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+const updateMe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.id;
+
+    const result = await userService.updateMe(userId as string, req.body);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getMe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.id;
+
+    const result = await userService.getMe(userId as string);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const UserController = {
-  getAllUsers, updateUserStatus
+  getAllUsers, updateUserStatus, updateMe, getMe
 };

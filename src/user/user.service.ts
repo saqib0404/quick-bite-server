@@ -4,6 +4,14 @@ import { prisma } from "../lib/prisma";
 const ALLOWED_STATUS = ["ACTIVE", "SUSPENDED"] as const;
 type AllowedStatus = (typeof ALLOWED_STATUS)[number];
 
+type UpdateUserInput = {
+    name?: string;
+    phone?: string | null;
+    image?: string | null;
+    addresses?: any;
+    businessName?: string | null;
+};
+
 const getAllUsers = async () => {
     return prisma.user.findMany({
         where: {
@@ -73,7 +81,60 @@ const updateUserStatus = async (userId: string, status: string) => {
     });
 };
 
+const updateMe = async (userId: string, data: UpdateUserInput) => {
+    const allowedData: any = {};
+
+    if (data.name !== undefined) allowedData.name = data.name;
+    if (data.phone !== undefined) allowedData.phone = data.phone;
+    if (data.image !== undefined) allowedData.image = data.image;
+    if (data.addresses !== undefined) allowedData.addresses = data.addresses;
+    if (data.businessName !== undefined) allowedData.businessName = data.businessName;
+
+    if (Object.keys(allowedData).length === 0) {
+        const err: any = new Error("No valid fields provided for update.");
+        err.statusCode = 400;
+        throw err;
+    }
+
+    return prisma.user.update({
+        where: { id: userId },
+        data: allowedData,
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+            addresses: true,
+            businessName: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+};
+
+const getMe = async (userId: string) => {
+    return prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+            addresses: true,
+            businessName: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+};
+
 
 export const userService = {
-    getAllUsers, updateUserStatus
+    getAllUsers, updateUserStatus, updateMe, getMe
 };
