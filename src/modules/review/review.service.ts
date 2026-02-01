@@ -33,6 +33,21 @@ const createOrUpdateReview = async (userId: string, data: CreateOrUpdateReviewIn
         throw err;
     }
 
+    //  user must have ordered this item at least once
+    const hasAnyOrder = await prisma.order.findFirst({
+        where: {
+            customerId: userId,
+            menuItemId,
+        },
+        select: { id: true },
+    });
+
+    if (!hasAnyOrder) {
+        const err: any = new Error("You can only review items you have ordered.");
+        err.statusCode = 403;
+        throw err;
+    }
+
     // Upsert based on unique(userId, menuItemId)
     const review = await prisma.review.upsert({
         where: {

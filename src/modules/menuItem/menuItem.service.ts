@@ -44,11 +44,11 @@ const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
         throw err;
     }
 
-    // if (!user.isApproved) {
-    //     const err: any = new Error("Provider is not approved yet.");
-    //     err.statusCode = 403;
-    //     throw err;
-    // }
+    if (!user.isApproved) {
+        const err: any = new Error("Provider is not approved yet.");
+        err.statusCode = 403;
+        throw err;
+    }
 
     const restaurant = await prisma.restaurant.findFirst({
         where: { providerId: userId },
