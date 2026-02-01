@@ -29,7 +29,7 @@ const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
 
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { role: true, isApproved: true },
+        select: { role: true, status: true },
     });
 
     if (!user) {
@@ -44,8 +44,8 @@ const createMenuItem = async (userId: string, data: CreateMenuItemInput) => {
         throw err;
     }
 
-    if (!user.isApproved) {
-        const err: any = new Error("Provider is not approved yet.");
+    if (user.status === "SUSPENDED") {
+        const err: any = new Error("User is not SUSPENDED.");
         err.statusCode = 403;
         throw err;
     }

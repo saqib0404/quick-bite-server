@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { auth as betterAuth } from "../lib/auth";
+import { prisma } from "../lib/prisma";
 
 export enum UserRole {
     CUSTOMER = "CUSTOMER",
@@ -15,6 +16,7 @@ declare global {
                 email: string;
                 name: string;
                 role: UserRole;
+                status: string
             };
         }
     }
@@ -43,11 +45,17 @@ export const auth = (...roles: UserRole[]) => {
                 });
             }
 
+            const dbUser = await prisma.user.findUnique({
+                where: { id: session.user.id },
+                select: { status: true },
+            });
+
             req.user = {
                 id: session.user.id,
                 email: session.user.email,
                 name: session.user.name,
                 role,
+                status: dbUser?.status!
             };
 
             if (roles.length && !roles.includes(role)) {
