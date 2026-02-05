@@ -16,7 +16,6 @@ const checkoutFromCart = async (req: Request, res: Response, next: NextFunction)
     try {
         const customerId = req.user!.id;
 
-        // deliveryAddressSnapshot is required for COD delivery
         const { deliveryAddressSnapshot, notes } = req.body;
 
         const result = await orderService.checkoutFromCart(customerId, {
