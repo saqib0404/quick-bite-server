@@ -8,7 +8,7 @@ import errorHandler from "./middlewares/globalErrorEandler";
 import { cartRouter } from "./modules/cart/cart.router";
 import { orderRouter } from "./modules/order/order.router";
 import { reviewRouter } from "./modules/review/review.router";
-import { userRouter } from "./user/user.router";
+import { userRouter } from "./modules/user/user.router";
 
 const app: Application = express();
 

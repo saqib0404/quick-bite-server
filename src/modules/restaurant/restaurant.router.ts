@@ -5,7 +5,11 @@ const router = express.Router()
 
 router.get("/", RestaurantController.getRestaurants)
 
+router.get("/provider/:providerId", auth(UserRole.PROVIDER), RestaurantController.getRestaurantByProviderId)
+
 router.get("/:restaurantId", RestaurantController.getRestaurantById)
+
+router.patch("/:restaurantId", auth(UserRole.PROVIDER), RestaurantController.updateRestaurant);
 
 router.post("/", auth(UserRole.PROVIDER), RestaurantController.createRestaurant)
 

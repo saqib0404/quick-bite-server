@@ -38,9 +38,50 @@ const getRestaurantById = async (req: Request, res: Response, next: NextFunction
     }
 };
 
+const getRestaurantByProviderId = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const { providerId } = req.params
+        const result = await restaurantService.getRestaurantByProviderId(providerId as string);
+
+        res.status(200).json(result)
+    } catch (err) {
+        next(err);
+    }
+};
+
+const updateRestaurant = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user?.id) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized!",
+            });
+        }
+
+        const { restaurantId } = req.params;
+
+        const result = await restaurantService.updateRestaurant(
+            restaurantId as string,
+            req.user.id,
+            req.body
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Restaurant updated.",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 
 export const RestaurantController = {
     createRestaurant,
     getRestaurants,
-    getRestaurantById
+    getRestaurantById,
+    updateRestaurant,
+    getRestaurantByProviderId
 }
