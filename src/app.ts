@@ -13,11 +13,40 @@ import { userRouter } from "./modules/user/user.router";
 const app: Application = express();
 
 app.use(express.json())
-app.use(cors({
-    origin: process.env.APP_URL,
-    credentials: true
-}))
 
+// Configure CORS to allow both production and Vercel preview deployments
+const allowedOrigins = [
+    process.env.APP_URL || "http://localhost:3000",
+    process.env.PROD_APP_URL,
+    process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Allow requests with no origin (mobile apps, Postman, etc.)
+            if (!origin) return callback(null, true);
+
+            // Check if origin is in allowedOrigins or matches Vercel preview pattern
+            const isAllowed =
+                allowedOrigins.includes(origin) ||
+                /^https:\/\/.*\.vercel\.app$/.test(origin) ||
+                origin === "http://localhost:3000" ||
+                origin === "http://localhost:3001";
+
+            if (isAllowed) {
+                callback(null, true);
+            } else {
+                callback(new Error(`Origin ${origin} not allowed by CORS`));
+            }
+        },
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+        exposedHeaders: ["Set-Cookie"],
+        // maxAge: 86400, // 24 hours
+    }),
+);
 
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 

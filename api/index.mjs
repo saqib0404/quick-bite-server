@@ -437,8 +437,7 @@ var getAllMenuItems2 = async (req, res, next) => {
     });
     res.status(200).json(result);
   } catch (err) {
-    console.log(err);
-    res.send(err);
+    next(err);
   }
 };
 var getMenuItemById2 = async (req, res, next) => {
@@ -498,12 +497,23 @@ var MenuItemController = {
 // src/lib/auth.ts
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+var trustedOriginsList = [
+  process.env.APP_URL,
+  // Local development
+  process.env.PROD_APP_URL,
+  // Production frontend
+  process.env.FRONTEND_URL
+  // Additional frontend URL
+].filter(Boolean);
+if (process.env.VERCEL_ENV === "preview" || process.env.VERCEL_ENV === "production") {
+  trustedOriginsList.push("https://*.vercel.app");
+}
 var auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql"
     // or "mysql", "postgresql", ...etcc
   }),
-  trustedOrigins: [process.env.APP_URL],
+  trustedOrigins: trustedOriginsList,
   user: {
     additionalFields: {
       role: {
@@ -547,6 +557,25 @@ var auth = betterAuth({
       accessType: "offline",
       prompt: "select_account consent"
     }
+  },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60
+      // 5 minutes
+    }
+  },
+  advanced: {
+    cookiePrefix: "better-auth",
+    useSecureCookies: process.env.NODE_ENV === "production",
+    sameSiteCookie: "none",
+    // Allow cross-domain cookies for Vercel deployments
+    crossSubDomainCookies: {
+      enabled: true
+      // Enable for cross-domain cookie handling
+    },
+    disableCSRFCheck: true
+    // Allow requests without Origin header (Postman, mobile apps, etc.)
   }
 });
 
@@ -1614,10 +1643,30 @@ var userRouter = router6;
 // src/app.ts
 var app = express3();
 app.use(express3.json());
-app.use(cors({
-  origin: process.env.APP_URL,
-  credentials: true
-}));
+var allowedOrigins = [
+  process.env.APP_URL || "http://localhost:3000",
+  process.env.PROD_APP_URL,
+  process.env.FRONTEND_URL
+].filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.includes(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin) || origin === "http://localhost:3000" || origin === "http://localhost:3001";
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    exposedHeaders: ["Set-Cookie"],
+    maxAge: 86400
+    // 24 hours
+  })
+);
 app.all("/api/auth/{*any}", toNodeHandler(auth));
 app.use("/menu-items", menuItemsRouter);
 app.use("/restaurants", restaurantRouter);

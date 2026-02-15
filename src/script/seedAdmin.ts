@@ -5,7 +5,7 @@ import { UserRole } from "../middlewares/auth.middleware"
 async function seedAdmin() {
     try {
         const adminData = {
-            name: "Admin1 Sir",
+            name: "Admin Sir",
             email: "admin1@db.com",
             role: UserRole.ADMIN,
             password: "admin1234"
@@ -21,7 +21,7 @@ async function seedAdmin() {
             throw new Error("User exists!!")
         }
 
-        const signUpAdmin = await fetch("http://localhost:5000/api/auth/sign-up/email", {
+        const signUpAdmin = await fetch("https://quick-bite-server-five.vercel.app/api/auth/sign-up/email", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
