@@ -16,7 +16,7 @@ model User {
     businessName String?
     isApproved   Boolean @default(true)
 
-    addresses Json?
+    addresses String?
 
     cart Cart?
 

@@ -21,6 +21,12 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
+// app.post("/webhook", express.raw({ type: "application/json" }), async(req, res) => {
+//     // Handle Stripe webhook events here
+//     console.log("Received Stripe webhook event:", req.body);
+//     res.status(200).send("Webhook received");
+// });
+
 app.use(
     cors({
         origin: (origin, callback) => {
