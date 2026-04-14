@@ -46,7 +46,7 @@ export const auth = betterAuth({
                 required: false,
             },
             addresses: {
-                type: "json",
+                type: "string",
                 required: false,
             }
         }
