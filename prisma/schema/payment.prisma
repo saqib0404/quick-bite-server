@@ -1,0 +1,16 @@
+model Payment {
+    id                 String        @id @default(uuid(7))
+    amount             Float
+    transactionId      String        @unique
+    status             PaymentStatus @default(UNPAID)
+    paymentGatewayData Json?
+    createdAt          DateTime      @default(now())
+    updatedAt          DateTime      @updatedAt
+
+    cartId String      @unique
+    cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+    @@index([cartId])
+    @@index([transactionId])
+    @@map("payments")
+}

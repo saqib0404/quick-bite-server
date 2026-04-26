@@ -11,4 +11,4 @@ router.delete("/item/:menuItemId", auth(UserRole.CUSTOMER), CartController.remov
 
 router.delete("/clear", auth(UserRole.CUSTOMER), CartController.clearCart);
 
-export const cartRouter = router
+export const cartRouter: Router = router

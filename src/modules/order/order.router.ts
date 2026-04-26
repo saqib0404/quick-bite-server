@@ -19,4 +19,4 @@ router.get("/provider", auth(UserRole.PROVIDER), OrderController.getProviderOrde
 // Provider: update order status
 router.patch("/:orderId/status", auth(UserRole.PROVIDER), OrderController.updateOrderStatusByProvider);
 
-export const orderRouter = router;
+export const orderRouter: Router = router;
