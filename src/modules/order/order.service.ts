@@ -110,7 +110,7 @@ const checkoutFromCart = async (customerId: string, input: CheckoutInput) => {
             cartId: cart.id,
         },
         update: {
-            amount: totalCents / 100,
+            amount: totalCents,
             transactionId,
             status: PaymentStatus.UNPAID,
             paymentGatewayData: {
@@ -120,7 +120,7 @@ const checkoutFromCart = async (customerId: string, input: CheckoutInput) => {
         },
         create: {
             cartId: cart.id,
-            amount: totalCents / 100,
+            amount: totalCents,
             transactionId,
             status: PaymentStatus.UNPAID,
             paymentGatewayData: {
@@ -130,24 +130,34 @@ const checkoutFromCart = async (customerId: string, input: CheckoutInput) => {
         },
     });
 
+    const currency = "usd";
+    const lineItems = cartItems.map((item) => {
+        const menuItem = map.get(item.menuItemId)!;
+
+        return {
+            price_data: {
+                currency,
+                product_data: {
+                    name: "Menu Item",
+                },
+                unit_amount: menuItem.priceCents,
+            },
+            quantity: item.quantity,
+        };
+    });
+
+    console.log("Stripe checkout payload", {
+        currency,
+        totalCents,
+        totalDollars: totalCents / 100,
+        lineItems,
+    });
+
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
 
-        line_items: cartItems.map((item) => {
-            const menuItem = map.get(item.menuItemId)!;
-
-            return {
-                price_data: {
-                    currency: "usd",
-                    product_data: {
-                        name: "Menu Item",
-                    },
-                    unit_amount: menuItem.priceCents,
-                },
-                quantity: item.quantity,
-            };
-        }),
+        line_items: lineItems,
 
         metadata: {
             cartId: cart.id,

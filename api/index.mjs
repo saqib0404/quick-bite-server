@@ -1204,7 +1204,7 @@ var checkoutFromCart = async (customerId, input) => {
       cartId: cart.id
     },
     update: {
-      amount: totalCents / 100,
+      amount: totalCents,
       transactionId,
       status: PaymentStatus.UNPAID,
       paymentGatewayData: {
@@ -1214,7 +1214,7 @@ var checkoutFromCart = async (customerId, input) => {
     },
     create: {
       cartId: cart.id,
-      amount: totalCents / 100,
+      amount: totalCents,
       transactionId,
       status: PaymentStatus.UNPAID,
       paymentGatewayData: {
@@ -1230,7 +1230,7 @@ var checkoutFromCart = async (customerId, input) => {
       const menuItem = map.get(item.menuItemId);
       return {
         price_data: {
-          currency: "bdt",
+          currency: "usd",
           product_data: {
             name: "Menu Item"
           },
@@ -1253,8 +1253,8 @@ var checkoutFromCart = async (customerId, input) => {
     },
     client_reference_id: cart.id,
     customer_email: cart.user.email ?? void 0,
-    success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${frontendUrl}/cart`
+    success_url: `${frontendUrl}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${frontendUrl}/dashboard/cart?canceled=true`
   });
   await prisma.payment.update({
     where: {
