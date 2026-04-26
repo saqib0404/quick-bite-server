@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express"
+import express, { NextFunction, Request, Response, Router } from "express"
 import { MenuItemController } from "./menuItem.controller"
 import { auth, UserRole } from "../../middlewares/auth.middleware"
 const router = express.Router()
@@ -16,4 +16,4 @@ router.patch("/:menuItemId", auth(UserRole.PROVIDER), MenuItemController.updateM
 router.delete("/:menuItemId", auth(UserRole.PROVIDER), MenuItemController.deleteMenuItem);
 
 
-export const menuItemsRouter = router
+export const menuItemsRouter: Router = router

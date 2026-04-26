@@ -6,7 +6,7 @@ async function seedAdmin() {
     try {
         const adminData = {
             name: "Admin Sir",
-            email: "admin1@db.com",
+            email: "admin@db.com",
             role: UserRole.ADMIN,
             password: "admin1234"
         }

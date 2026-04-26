@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma";
-import { OrderStatus, PaymentStatus } from "../../../generated/prisma/enums";
 import { v7 as uuidv7 } from "uuid";
 import { stripe } from "../../config/stripe.config";
+import { OrderStatus, PaymentStatus } from "../../generated/enums";
 
 type CheckoutInput = {
     deliveryAddressSnapshot: any; // JSON snapshot required

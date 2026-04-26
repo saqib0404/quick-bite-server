@@ -1,4 +1,5 @@
-import { CuisineType, MenuItem } from "../../../generated/prisma/client"
+
+import { CuisineType } from "../../generated/enums";
 import { prisma } from "../../lib/prisma"
 
 type CreateMenuItemInput = {

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { auth, UserRole } from "../../middlewares/auth.middleware";
 import { UserController } from "./user.controller";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", auth(UserRole.ADMIN), UserController.getAllUsers);
 
@@ -14,4 +14,4 @@ router.patch("/:userId/status", auth(UserRole.ADMIN), UserController.updateUserS
 
 
 
-export const userRouter = router;
+export const userRouter: Router = router;

@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import { prisma } from "../../lib/prisma";
-import { OrderStatus, PaymentStatus } from "../../../generated/prisma/enums";
-import { Prisma } from "../../../generated/prisma/client";
+import { OrderStatus, PaymentStatus, Prisma } from "../../generated/client";
 
 type CartItem = {
     menuItemId: string;

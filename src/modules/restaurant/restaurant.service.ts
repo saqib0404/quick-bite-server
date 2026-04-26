@@ -1,4 +1,5 @@
-import { Restaurant } from "../../../generated/prisma/client"
+
+import { Restaurant } from "../../generated/client";
 import { prisma } from "../../lib/prisma"
 
 type UpdateRestaurantInput = {
