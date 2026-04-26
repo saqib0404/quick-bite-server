@@ -8,11 +8,6 @@ type CheckoutInput = {
     notes?: string;
 };
 
-type CartItem = {
-    menuItemId: string;
-    quantity: number;
-};
-
 const getallOrders = async () => {
     return prisma.order.findMany({
         orderBy: {
