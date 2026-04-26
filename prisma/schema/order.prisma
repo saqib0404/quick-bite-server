@@ -9,7 +9,11 @@ model Order {
     restaurantId String
     restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Restrict)
 
+    paymentId String?
+    payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
     status                  OrderStatus @default(PENDING)
+    quantity                Int         @default(1)
     totalCents              Int
     notes                   String?
     deliveryAddressSnapshot Json? // store address snapshot at time of order
@@ -20,6 +24,7 @@ model Order {
     @@index([customerId])
     @@index([restaurantId])
     @@index([menuItemId])
+    @@index([paymentId])
 }
 
 enum OrderStatus {

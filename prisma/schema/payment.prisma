@@ -1,16 +1,28 @@
 model Payment {
     id                 String        @id @default(uuid(7))
     amount             Float
-    transactionId      String        @unique
+    transactionId      String        @unique @db.Uuid()
+    stripeEventId      String?       @unique
+    stripeSessionId    String?       @unique
     status             PaymentStatus @default(UNPAID)
+    // invoiceUrl         String?
     paymentGatewayData Json?
     createdAt          DateTime      @default(now())
     updatedAt          DateTime      @updatedAt
 
-    cartId String      @unique
-    cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+    cartId String @unique
+    cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+    orders Order[]
 
     @@index([cartId])
     @@index([transactionId])
     @@map("payments")
+}
+
+enum PaymentStatus {
+    PAID
+    UNPAID
+    FAILED
+    EXPIRED
 }

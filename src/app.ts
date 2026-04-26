@@ -9,16 +9,14 @@ import { cartRouter } from "./modules/cart/cart.router";
 import { orderRouter } from "./modules/order/order.router";
 import { reviewRouter } from "./modules/review/review.router";
 import { userRouter } from "./modules/user/user.router";
+import { PaymentController } from "./modules/payment/payment.controller";
 
 const app: Application = express();
 
+app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent);
+
 app.use(express.json())
 
-app.post("/webhook", express.raw({ type: "application/json" }), async(req, res) => {
-    // Handle Stripe webhook events here
-    console.log("Received Stripe webhook event:", req.body);
-    res.status(200).send("Webhook received");
-});
 
 // Configure CORS to allow both production and Vercel preview deployments
 const allowedOrigins = [

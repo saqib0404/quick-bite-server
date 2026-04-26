@@ -1,9 +1,16 @@
 import { prisma } from "../../lib/prisma";
-import { OrderStatus } from "../../../generated/prisma/client";
+import { OrderStatus, PaymentStatus } from "../../../generated/prisma/enums";
+import { v7 as uuidv7 } from "uuid";
+import { stripe } from "../../config/stripe.config";
 
 type CheckoutInput = {
     deliveryAddressSnapshot: any; // JSON snapshot required
     notes?: string;
+};
+
+type CartItem = {
+    menuItemId: string;
+    quantity: number;
 };
 
 const getallOrders = async () => {
@@ -21,9 +28,27 @@ const checkoutFromCart = async (customerId: string, input: CheckoutInput) => {
         throw err;
     }
 
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!frontendUrl) {
+        const err: any = new Error("FRONTEND_URL is missing in environment variables.");
+        err.statusCode = 500;
+        throw err;
+    }
+
     const cart = await prisma.cart.findUnique({
         where: { userId: customerId },
-        select: { id: true, items: true },
+        select: {
+            id: true,
+            userId: true,
+            items: true,
+            user: {
+                select: {
+                    email: true,
+                    name: true,
+                },
+            },
+        },
     });
 
     if (!cart) {
@@ -78,49 +103,143 @@ const checkoutFromCart = async (customerId: string, input: CheckoutInput) => {
         }
     }
 
-    // Create orders in a transaction
-    const created = await prisma.$transaction(async (tx) => {
-        const createdOrders = [];
+    const totalCents = cartItems.reduce((sum, item) => {
+        const menuItem = map.get(item.menuItemId)!;
+        return sum + menuItem.priceCents * item.quantity;
+    }, 0);
 
-        for (const item of cartItems) {
-            const m = map.get(item.menuItemId)!;
-            const quantity = item.quantity as number;
+    const transactionId = String(uuidv7());
 
-            const totalCents = m.priceCents * quantity;
-
-            const order = await tx.order.create({
-                data: {
-                    customerId,
-                    menuItemId: m.id,
-                    restaurantId: m.restaurantId,
-                    status: OrderStatus.PENDING, 
-                    totalCents,
-                    notes: input.notes ?? null,
-                    deliveryAddressSnapshot: input.deliveryAddressSnapshot,
-                },
-            });
-
-            createdOrders.push(order);
-        }
-
-        // clear cart after successful order creation
-        await tx.cart.update({
-            where: { userId: customerId },
-            data: { items: [] },
-        });
-
-        return createdOrders;
+    const payment = await prisma.payment.upsert({
+        where: {
+            cartId: cart.id,
+        },
+        update: {
+            amount: totalCents / 100,
+            transactionId,
+            status: PaymentStatus.UNPAID,
+            paymentGatewayData: {
+                deliveryAddressSnapshot: input.deliveryAddressSnapshot,
+                notes: input.notes ?? null,
+            },
+        },
+        create: {
+            cartId: cart.id,
+            amount: totalCents / 100,
+            transactionId,
+            status: PaymentStatus.UNPAID,
+            paymentGatewayData: {
+                deliveryAddressSnapshot: input.deliveryAddressSnapshot,
+                notes: input.notes ?? null,
+            },
+        },
     });
 
-    const grandTotal = created.reduce((sum, o) => sum + o.totalCents, 0);
+    const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+
+        line_items: cartItems.map((item) => {
+            const menuItem = map.get(item.menuItemId)!;
+
+            return {
+                price_data: {
+                    currency: "bdt",
+                    product_data: {
+                        name: "Menu Item",
+                    },
+                    unit_amount: menuItem.priceCents,
+                },
+                quantity: item.quantity,
+            };
+        }),
+
+        metadata: {
+            cartId: cart.id,
+            paymentId: payment.id,
+            customerId,
+        },
+
+        payment_intent_data: {
+            metadata: {
+                cartId: cart.id,
+                paymentId: payment.id,
+                customerId,
+            },
+        },
+
+        client_reference_id: cart.id,
+        customer_email: cart.user.email ?? undefined,
+
+        success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${frontendUrl}/cart`,
+    });
+
+    await prisma.payment.update({
+        where: {
+            id: payment.id,
+        },
+        data: {
+            stripeSessionId: session.id,
+            paymentGatewayData: {
+                deliveryAddressSnapshot: input.deliveryAddressSnapshot,
+                notes: input.notes ?? null,
+                stripeSessionId: session.id,
+            },
+        },
+    });
 
     return {
-        message: "Order placed successfully (Cash on Delivery).",
-        totalCents: grandTotal,
-        orderCount: created.length,
-        orders: created,
+        message: "Stripe payment session created successfully.",
+        totalCents,
+        payment,
+        paymentUrl: session.url,
     };
 };
+
+//     // Create orders in a transaction
+//     const created = await prisma.$transaction(async (tx) => {
+//         const createdOrders = [];
+
+//         for (const item of cartItems) {
+//             const m = map.get(item.menuItemId)!;
+//             const quantity = item.quantity as number;
+
+//             const totalCents = m.priceCents * quantity;
+
+//             const order = await tx.order.create({
+//                 data: {
+//                     customerId,
+//                     menuItemId: m.id,
+//                     restaurantId: m.restaurantId,
+//                     status: OrderStatus.PENDING,
+//                     totalCents,
+//                     notes: input.notes ?? null,
+//                     deliveryAddressSnapshot: input.deliveryAddressSnapshot,
+//                 },
+//             });
+
+//             createdOrders.push(order);
+//         }
+
+//         // clear cart after successful order creation
+//         await tx.cart.update({
+//             where: { userId: customerId },
+//             data: { items: [] },
+//         });
+
+//         return createdOrders;
+//     });
+
+//     const grandTotal = created.reduce((sum, o) => sum + o.totalCents, 0);
+
+//     return {
+//         message: "Order placed successfully (Cash on Delivery).",
+//         totalCents: grandTotal,
+//         orderCount: created.length,
+//         orders: created,
+//     };
+// };
 
 const getMyOrders = async (customerId: string) => {
     return prisma.order.findMany({

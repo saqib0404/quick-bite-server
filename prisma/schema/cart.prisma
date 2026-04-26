@@ -12,7 +12,4 @@ model Cart {
     updatedAt DateTime @updatedAt
 }
 
-enum PaymentStatus {
-    PAID
-    UNPAID
-}
+
